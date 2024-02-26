@@ -4,47 +4,64 @@ import eel
 
 import win32com.client
 
-# Create output folder
-output_dir = Path.cwd() / "Output"
-output_dir.mkdir(parents=True, exist_ok=True)
-
-# Connect to outlook
-outlook = win32com.client.Dispatch("Outlook.Application").GetNamespace("MAPI")
+default_folder = {
+    "DeletedItems": 3,
+    "Outbox": 4,
+    "SentMail": 5,
+    "Inbox": 6,
+    "Drafts": 16,
+    "FolderJunk": 23
+}
 
 
 @eel.expose
-def get_mail_outlook(num_of_mail=5):
+def get_mail_outlook(output_dir=Path.cwd() / "output",
+                     get_attachments=True, mail_folder="Inbox", from_date=None, to_date=None):
+    # Create output folder
+    output_dir.mkdir(parents=True, exist_ok=True)
+
+    # Connect to outlook
+    outlook = win32com.client.Dispatch("Outlook.Application").GetNamespace("MAPI")
+
     # Connect to folder
-    # inbox = outlook.Folders("youremail@provider.com").Folders("Inbox")
-    inbox = outlook.GetDefaultFolder(6)
-    # https://docs.microsoft.com/en-us/office/vba/api/outlook.oldefaultfolders
-    # DeletedItems=3, Outbox=4, SentMail=5, Inbox=6, Drafts=16, FolderJunk=23
+    try:
+        folder = outlook.GetDefaultFolder(default_folder[mail_folder])  # Default is INBOX Folder
+    except:
+        raise Exception("Can't open folder")
 
     # Get messages
-    messages = inbox.Items
+    messages = folder.Items
     messages.Sort("[ReceivedTime]", True)
 
     # Filter messages
-    # today = datetime.date.today()
-    # yesterday = today - datetime.timedelta(days=1)
-    # messages = messages.Restrict("[ReceivedTime] >= '" + yesterday.strftime('%m/%d/%Y %H:%M:%S') + "'")
+    if from_date is not None:
+        _from_date = datetime.datetime.strptime(from_date, '%m/%d/%Y')
+    else:
+        _from_date = datetime.datetime.now()
+    messages = messages.Restrict("[ReceivedTime] >= '" + _from_date.strftime('%m/%d/%Y') + "'")
+
+    if to_date is not None:
+        _to_date = datetime.datetime.strptime(to_date, '%m/%d/%Y')
+        messages = messages.Restrict("[ReceivedTime] <= '" + _to_date.strftime('%m/%d/%Y') + "'")
 
     # Filter by keyword in subject
     # messages = messages.Restrict("[Subject] = 'Test'")
 
-    print(messages)
+    try:
+        for message in messages:
+            send_date = message.SentOn
+            sender = message.Sender.Name
+            date_folder = output_dir / send_date.strftime('%m-%d-%Y')
+            date_folder.mkdir(parents=True, exist_ok=True)
+            message_folder = date_folder / sender
+            message_folder.mkdir(parents=True, exist_ok=True)
 
-    i = 0
-    for message in messages:
-        subject = message.Subject
-        body = message.body
-        attachments = message.Attachments
+            with open(message_folder.absolute().as_posix() + '/' + "body.txt", "w", encoding="utf-8") as text_file:
+                text_file.write(message.Subject + '\n' + message.body.strip())
 
-        if i > 5:
-            break
-        else:
-            i += 1
-
-        return f"Subject: {subject}"
-
-        # return (f"Body: {body}")
+            if get_attachments:
+                for att in message.Attachments:
+                    att.SaveAsFile(message_folder.absolute().as_posix() + '\\' + att.FileName)
+        return None
+    except Exception as ex:
+        return ex
