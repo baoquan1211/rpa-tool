@@ -1,11 +1,13 @@
-"""Python test eel application with react for UI"""
 
 import argparse
 import json
 import os
 
 import eel
-import app.backend
+
+# import all app tasks (contain ell.expose)
+import app.tasks.get_mail_gmail
+import app.tasks.get_mail_outlook
 
 
 def get_args():
@@ -40,7 +42,7 @@ def main(args):
 
     if args.dev:
         web_dir = "src"
-        app = None
+        app = "chrome"
         page = {"port": config['vite']['port']}
         exts = [".tsx", ".ts", ".jsx", ".js", ".html"]
         print(f"Local: http://{config['app']['host']}:{config['vite']['port']}")

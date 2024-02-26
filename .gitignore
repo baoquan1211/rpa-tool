@@ -6,6 +6,8 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
+*.lock
+package-lock.json
 
 # builds
 node_modules
@@ -27,6 +29,7 @@ dist-ssr
 *.sln
 *.sw?
 
+# Environment
 .venv
 .env
 venv

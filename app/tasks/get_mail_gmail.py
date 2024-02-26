@@ -10,9 +10,9 @@ settings = Settings()
 
 
 @eel.expose
-def get_mail():
-    gmail_account = settings.gmail_account
-    gmail_password = settings.gmail_password
+def get_mail(gmail_account: str, gmail_password: str):
+    # gmail_account = settings.gmail_account
+    # gmail_password = settings.gmail_password
 
     mail = ImapSmtp(smtp_server="smtp.gmail.com", smtp_port=587)
 
