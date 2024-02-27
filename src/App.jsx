@@ -1,15 +1,14 @@
 import { useState, useEffect } from 'react'
-import { eel } from "./eel.js";
-import logo from "./assets/react.svg"
 import './index.css';
-
+import getMailOutlook from "./services/getMailOutlook.js";
+import getMailGmail from "./services/getMailGmail.js";
 
 function App() {
   const [msg, setMsg] = useState("Loading...");
 
   useEffect(() => {
-    // eel.get_mail("quachbaoquan123@gmail.com", "aordkzcmxzcydlwd")(res => setMsg(res));
-    eel.get_mail_outlook() (res => setMsg(res))
+    getMailGmail("quachbaoquan123@gmail.com", "aordkzcmxzcydlwd", "RPAFujinet", "gmail")(res => setMsg(res));
+    getMailOutlook("outlook", "test_rpa")(res => setMsg(res))
   }, []);
 
   return (

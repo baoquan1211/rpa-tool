@@ -15,9 +15,14 @@ default_folder = {
 
 
 @eel.expose
-def get_mail_outlook(output_dir=Path.cwd() / "output",
-                     get_attachments=True, mail_folder="Inbox", from_date=None, to_date=None):
+def get_mail_outlook(output_dir: str | None = None,
+                     get_attachments=True, mail_folder="Inbox", from_date=None, to_date=None,
+                     keyword: str | None = None):
     # Create output folder
+    if output_dir is None:
+        output_dir = Path.cwd() / "output" / "gmail"
+    else:
+        output_dir = Path(output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
 
     # Connect to outlook
@@ -45,12 +50,13 @@ def get_mail_outlook(output_dir=Path.cwd() / "output",
         messages = messages.Restrict("[ReceivedTime] <= '" + _to_date.strftime('%m/%d/%Y') + "'")
 
     # Filter by keyword in subject
-    # messages = messages.Restrict("[Subject] = 'Test'")
+    if keyword is not None:
+        messages = messages.Restrict(f"@SQL=(urn:schemas:httpmail:subject LIKE '%{keyword}%')")
 
     try:
         for message in messages:
             send_date = message.SentOn
-            sender = message.Sender.Name
+            sender = message.Sender.Address
             date_folder = output_dir / send_date.strftime('%m-%d-%Y')
             date_folder.mkdir(parents=True, exist_ok=True)
             message_folder = date_folder / sender
