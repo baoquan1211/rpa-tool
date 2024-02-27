@@ -1,7 +1,7 @@
 from RPA.Email.ImapSmtp import ImapSmtp
 from settings import Settings
 from email.message import Message
-from datetime import datetime, timedelta
+from datetime import datetime
 import eel
 import json
 from pathlib import Path
