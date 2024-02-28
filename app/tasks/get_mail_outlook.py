@@ -40,14 +40,14 @@ def get_mail_outlook(output_dir: str | None = None,
 
     # Filter messages
     if from_date is not None:
-        _from_date = datetime.datetime.strptime(from_date, '%m/%d/%Y')
+        _from_date = datetime.datetime.strptime(from_date, '%d/%m/%Y')
     else:
         _from_date = datetime.datetime.now()
-    messages = messages.Restrict("[ReceivedTime] >= '" + _from_date.strftime('%m/%d/%Y') + "'")
+    messages = messages.Restrict("[ReceivedTime] >= '" + _from_date.strftime('%d/%m/%Y') + "'")
 
     if to_date is not None:
         _to_date = datetime.datetime.strptime(to_date, '%m/%d/%Y')
-        messages = messages.Restrict("[ReceivedTime] <= '" + _to_date.strftime('%m/%d/%Y') + "'")
+        messages = messages.Restrict("[ReceivedTime] <= '" + _to_date.strftime('%d/%m/%Y') + "'")
 
     # Filter by keyword in subject
     if keyword is not None:
